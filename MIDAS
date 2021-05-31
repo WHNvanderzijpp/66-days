@@ -1,0 +1,159 @@
+install.packages("quantmod")
+install.packages("datetimeutils")
+install.packages("midasr")
+install.packages('tseries')
+install.packages('readxl')
+install.packages('fpp2')
+install.packages('tseries')
+install.packages('dynlm')
+install.packages('urca')
+install.packages('corrplot')
+install.packages('quadprog')
+install.packages('forecast')
+install.packages('vars')
+install.packages('quantmod')
+install.packages('ggplot2')
+install.packages('xts')
+install.packages('ggfortify')
+install.packages('timetk')
+install.packages('tcltk')
+install.packages('tempdisagg')
+install.packages('writexl')
+
+
+library('readxl') 
+library('fpp2')   
+library('tseries')
+library('dynlm')  
+library('urca')    
+library('corrplot')
+library('quadprog')
+library('forecast')
+library('vars')    
+library("quantmod")
+library("readxl")
+library("midasr")
+library('tseries')
+library('ggplot2')
+library('xts')
+library('ggfortify')
+library('timetk')
+library('tcltk')
+library('tempdisagg')
+library('writexl')
+
+
+#Gathering stock data
+SPX <- getSymbols("^GSPC",auto.assign = FALSE, from = "1966-01-01", to ="2020-10-02")
+#Isolating stock prices
+p <- SPX$GSPC.Close
+autoplot(p)
+#Checking for stationarity
+acf(p)
+pacf(p)
+adf.test(p) #Augmented Dickey Fuller Test
+#Calculating double first difference stock prices since p is non stationary
+y <- diff(diff(log(p))) * 100
+autoplot(y)
+#inserting NA values for weekends and holidays
+p <- p %>%  
+  tk_tbl() %>%            # transform into tibble
+  pad_by_time() %>%       # add the missing records
+  tk_xts()                # transform back into xts format.
+
+#Checking for stationarity
+mean(na.omit(y))
+acf(na.omit(y))
+pacf(na.omit(y))
+adf.test(na.omit(y)) #Augmented Dickey Fuller
+
+
+#Total Public to Debt data
+GFDEGDQ188S$DATE <- as.Date(GFDEGDQ188S$DATE)              #dates for xts
+DEBTGDP <- xts(GFDEGDQ188S$GFDEGDQ188S, GFDEGDQ188S$DATE)  #creating xts
+autoplot.zoo(DEBTGDP)
+#First Difference Total Public Debt x
+x <- diff(log(DEBTGDP)) * 100
+autoplot(x)
+#Partial and auto correlation x
+mean(na.omit(x))
+acf(na.omit(x))
+pacf(na.omit(x))
+
+#Testing for stationarity using Augmented Dickey Fuller
+adf.test(DEBTGDP)
+adf.test(na.omit(x))
+
+#Frequency Alignment
+
+
+#High frequency model
+b <- as.numeric(x)
+length(b)   #220 observations of quarterly Debt to GDP
+m = 66      #m is the frequency ratio/mismatch
+out <- c()  #empty vector
+
+for(j in 2:220){
+  for(i in 1:66){
+    out <- c(out, (1-i/m)* b[j] + (i/m)* b[j+1])#formula for desaggregating the LF variable
+  }
+}
+
+df1 <- data.frame(out)
+df1
+pp <-unlist(tapply(p, as.yearqtr(index(p)), FUN = function(x) {length(x) <- 66; x[1:66]}))
+uu <- date.frame(pp)
+frame <- merge(p,DEBTGDP)
+frame2 <- merge(p,x)
+
+n <- nrow(frame)
+
+huts <- fortify(frame2)
+
+write_xlsx(huts, "C:\\Users\\wietz\\OneDrive\\Bureaublad\\PAPER\\MIDAS\\Thesis\\myfile.xlsx" )
+write.csv(huts,"C:\\Users\\wietz\\OneDrive\\Bureaublad\\PAPER\\MIDAS\\Thesis\\myfile.csv", row.names = FALSE)
+
+close <- X66$GSPC.Close
+gee <- X66$x
+
+X66$Index <- as.Date(X66$Index)
+prices <- xts(X66$GSPC.Close, X66$Index)
+
+dd$Index <- as.Date(dd$Index)
+deb <- xts(dd$x, dd$Index)
+
+np <- ts(prices, frequency = 66)
+nd <- na.omit(ts(deb, frequency = 4))
+
+beta0 <- midas_r(nd ~ mls(nd, 1, 1) + mls(np, 3:15, 66, nbeta),
+                 start = list(np = c(1.7, 1, 5)))
+
+
+b <- as.numeric(x)
+m = 66
+out <- c()
+for(j in 2:220){
+  for(i in 1:66){
+    out <- c(out, (1-i/m)* b[j] + (i/m)* b[j+1])
+  }
+}
+
+df1 <- data.frame(out)
+uu <-p[ave(seq_along(index(p)), as.yearqtr(index(p)), FUN = 
+          seq_along) <= 1:60]
+
+
+n <- min(tapply(seq_along(index(p)), as.yearqtr(index(p)), FUN = length))
+
+l <- p[ave(seq_along(index(p)), as.yearqtr(index(p)), FUN = 
+          seq_along) <= n]
+
+v <-p[ave(seq_along(index(p)), as.yearqtr(index(p)), FUN = 
+          seq_along) <= 66]
+v[66]
+
+pp <-unlist(tapply(p, as.yearqtr(index(p)), FUN = function(x) {length(x) <- 66; x[1:66]}))
+g <-tapply(seq_along(index(p)), as.yearqtr(index(p)), FUN = length)
+j <- 1:3
+uuu <-data.frame(pp)
+tt <-as.xts(pp)
