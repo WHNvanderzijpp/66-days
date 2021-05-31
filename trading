@@ -6,7 +6,12 @@ p <- SPX$GSPC.Close
 p[66]
 #We see that the 66-th observation is not on 1966-04-01 but on 1966-04-05
 #What i am trying to do is to have the p[66] on 04-01 and p[132] on 07-01 etc
+#Using your first suggestion
 
+v <-p[ave(seq_along(index(p)), as.yearqtr(index(p)), FUN = 
+          seq_along) <= 66]
+#calling for the 66th observation
+v[66] #same as above
 
 #inserting NA values for weekends and holidays
 out_padded <- p %>%  
@@ -14,4 +19,17 @@ out_padded <- p %>%
   pad_by_time() %>%       # add the missing records
   tk_xts()                # transform back into xts format.
   
-  
+v <-out_padded[ave(seq_along(index(out_padded)), as.yearqtr(index(out_padded)), FUN = 
+          seq_along) <= 66]
+
+v[66] #unfortunately not the date i wanted
+
+
+#second line of code you wrote
+n <- min(tapply(seq_along(index(p)), as.yearqtr(index(p)), FUN = length))
+l <- p[ave(seq_along(index(p)), as.yearqtr(index(p)), FUN = 
+          seq_along) <= n]
+          
+l[66] #on the right date
+#however when looking at the df of l we see that there are only observations on the quarters are highlighted
+#whereas I am looking for a data frame which has 66 days of daily stock prices in each quarter
