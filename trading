@@ -1,0 +1,17 @@
+
+SPX <- getSymbols("^GSPC",auto.assign = FALSE, from = "1966-01-01", to ="2020-10-02")
+
+#Isolating stock prices
+p <- SPX$GSPC.Close
+p[66]
+#We see that the 66-th observation is not on 1966-04-01 but on 1966-04-05
+#What i am trying to do is to have the p[66] on 04-01 and p[132] on 07-01 etc
+
+
+#inserting NA values for weekends and holidays
+out_padded <- p %>%  
+  tk_tbl() %>%            # transform into tibble
+  pad_by_time() %>%       # add the missing records
+  tk_xts()                # transform back into xts format.
+  
+  
