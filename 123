@@ -1,0 +1,69 @@
+h <-function(beta){
+  maxlagx = 3 #>2max lag order
+  hmax = 1 #frequency mismatch
+  sx = 1:maxlagx #sequence for how many times to repeat x
+  xlag = c(1,2,3,7,2)
+  ux =1:(length(xlag)-length(sx)+1) #basis for looping to create m functions of x
+  intercept = rep(1,(length(ux)))
+  nx <-c()
+  for (i in sx) {
+    nx[i] <- exp(beta[3] * sx[i]) #nominator expo almon 
+  }
+  sal <-sum(nx) #denominator expo almon
+  z <-c()
+  for (i in sx) {
+    z[i] <- exp(beta[3] * sx[i])/sal #expoalmon
+  }
+  finalx <-c()
+  for (i in ux) {
+    finalx[i] <- sum(xlag[(i):(i+maxlagx-1)]*z[1:maxlagx]) #looping to create functions for xlag[1:j] xlag[j+1:j+j+1] etc
+  }
+}
+pracma::jacobian(h,c(1,1,1))
+
+#function for nls
+h <-function(beta){
+  maxlagy = 5 #>2max lag order
+  hmax = 2 #frequency mismatch
+  sy = 1:maxlagy #sequence for how many times to repeat y
+  ylag = c(1,2,3,7,2,4,2,5,6,10)
+  uy =1:(length(ylag)-length(sy)+1) #basis for looping to create m functions of y
+  intercept = rep(1,(length(uy)))
+  ny <-c()
+  for (i in sy) {
+    ny[i] <- exp(beta[5] * sy[i]) #nominator expo almon 
+  }
+  sal <-sum(ny) #denominator expo almon
+  z <-c()
+  for (i in sy) {
+    z[i] <- exp(beta[5] * sy[i])/sal #expoalmon
+  }
+  finaly <-c()
+  for (i in uy) {
+    finaly[i] <- sum(ylag[(i):(i+maxlagy-1)]*z[1:maxlagy]) #looping to create functions for ylag[1:j] ylag[j+1:j+j+1] etc
+  }
+  #for x
+  
+  maxlagx = 3 #>2max lag order
+  sx = 1:maxlagx #sequence for how many times to repeat x
+  xlag = c(1,2,3,7,2,2)
+  ux =1:((length(ylag)-length(sy)+1)/hmax) #basis for looping to create m functions of x
+  intercept = rep(1,(length(ux)))
+  nx <-c()
+  for (i in sx) {
+    nx[i] <- exp(beta[3] * sx[i]) #nominator expo almon 
+  }
+  sal <-sum(nx) #denominator expo almon
+  z <-c()
+  for (i in sx) {
+    z[i] <- exp(beta[3] * sx[i])/sal #expoalmon
+  }
+  finalx <-c()
+  for (i in ux) {
+    finalx[i] <- sum(xlag[(i):(i+maxlagx-1)]*z[1:maxlagx]) #looping to create functions for xlag[1:j] xlag[j+1:j+j+1] etc
+  }
+  finalxs <-rep(finalx,each =hmax)
+  beta[1]*intercept + beta[2]*finalxs + beta[4]*finaly
+}
+pracma::jacobian(h,c(1,1,1,1,1))
+gaussNewton(c(1,1,1,1,1),h)
